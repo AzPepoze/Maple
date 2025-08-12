@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+     maple-bot:
+          build:
+               context: .
+               dockerfile: Dockerfile
+          container_name: maple_bot
+          restart: unless-stopped
+          volumes:
+             - ./.env:/app/.env
+             - ./data:/app/data
