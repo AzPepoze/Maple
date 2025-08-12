@@ -16,12 +16,20 @@ export async function handleDirectMessage(message: Message): Promise<void> {
 
 		appendToHistory(userHistory, "user", message.content);
 
+		logger.log(`Generating AI response for ${message.author.tag}...`); // Added log
+		const startTime = process.hrtime.bigint(); // Start timer
 		const fullText = await generateText(userHistory);
+		const endTime = process.hrtime.bigint(); // End timer
+		const duration = Number(endTime - startTime) / 1_000_000; // Convert to milliseconds
+
+		logger.log(`AI response generated for ${message.author.tag} in ${duration.toFixed(2)} ms.`); // Added log
 
 		if (fullText) {
 			appendToHistory(userHistory, "model", fullText);
 			await saveUserHistory(userId, userHistory);
 		}
+
+		logger.log(`AI response to ${message.author.tag}: ${fullText}`); // Added log
 
 		const textToSend = fullText || "...";
 		const chunkSize = 2000;
