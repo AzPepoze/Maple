@@ -22,7 +22,11 @@ export async function handleDirectMessage(message: Message, persona: string): Pr
 			await saveUserHistory(userId, userHistory);
 		}
 
-		await message.channel.send(fullText || "...");
+		const textToSend = fullText || "...";
+		const chunkSize = 2000;
+		for (let i = 0; i < textToSend.length; i += chunkSize) {
+			await message.channel.send(textToSend.substring(i, i + chunkSize));
+		}
 		console.log(`Sent response to ${message.author.tag}`);
 	} catch (error) {
 		console.error(`Error processing message from ${message.author.tag}:`, error);
