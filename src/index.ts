@@ -1,36 +1,22 @@
 import "dotenv/config";
-import * as fs from "fs/promises";
-import * as path from "path";
-import { startDiscordBot } from "./discord";
-
-//-------------------------------------------------------
-// Constants
-//-------------------------------------------------------
-const PERSONA_PATH = path.join(__dirname, "..", "data", "persona.md");
+import { startDiscordBot, client } from "./discord";
+import { logger } from "./logger"; // Import logger
+import { startWebServer } from "./web/server"; // Import web server
+import * as fs from 'fs';
 
 //-------------------------------------------------------
 // Main Execution
 //-------------------------------------------------------
-async function loadPersona(): Promise<string> {
-	try {
-		console.log(`Loading persona from: ${PERSONA_PATH}`);
-		const personaContent = await fs.readFile(PERSONA_PATH, "utf-8");
-		console.log("Persona loaded successfully.");
-		return personaContent;
-	} catch (error: any) {
-		if (error.code === "ENOENT") {
-			console.error(`FATAL: Persona file not found at '${PERSONA_PATH}'.`);
-			console.error("Please create the file and directory structure.");
-		} else {
-			console.error("Failed to read persona file:", error);
-		}
-		process.exit(1);
-	}
-}
-
 async function main() {
-	const persona = await loadPersona();
-	startDiscordBot(persona);
+	// Clear log.log at startup
+	const logFilePath = 'log.log';
+	if (fs.existsSync(logFilePath)) {
+		fs.writeFileSync(logFilePath, '');
+	}
+	logger.log("Starting bot...");
+	startDiscordBot();
+	const webServerPort = process.env.WEB_SERVER_PORT ? parseInt(process.env.WEB_SERVER_PORT) : 3000;
+	startWebServer({ port: webServerPort, discordClient: client }); // Start web server on specified port or 3000
 }
 
 main();

@@ -5,6 +5,9 @@ services:
                dockerfile: Dockerfile
           container_name: maple_bot
           restart: unless-stopped
+          environment:
+               - WEB_SERVER_PORT=${WEB_SERVER_PORT}
+          ports:
+               - "${WEB_SERVER_PORT}:${WEB_SERVER_PORT}"
           volumes:
-             - ./.env:/app/.env
              - ./data:/app/data

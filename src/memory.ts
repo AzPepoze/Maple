@@ -1,5 +1,6 @@
 import * as fs from "fs/promises";
 import * as path from "path";
+import { logger } from "./logger";
 
 //-------------------------------------------------------
 // Constants
@@ -37,7 +38,7 @@ async function loadMemory(): Promise<Memory> {
 			await fs.writeFile(MEMORY_PATH, JSON.stringify({}, null, 2), "utf-8");
 			return {};
 		}
-		console.error("Error reading or parsing memory.json:", error);
+		logger.error("Error reading or parsing memory.json:", error);
 		return {};
 	}
 }
@@ -47,7 +48,7 @@ async function saveMemory(memory: Memory): Promise<void> {
 		await fs.mkdir(path.dirname(MEMORY_PATH), { recursive: true });
 		await fs.writeFile(MEMORY_PATH, JSON.stringify(memory, null, 2), "utf-8");
 	} catch (error) {
-		console.error("Error saving memory:", error);
+		logger.error("Error saving memory:", error);
 	}
 }
 

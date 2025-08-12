@@ -1,21 +1,22 @@
 import { Message, ChannelType } from "discord.js";
 import { getUserHistory, appendToHistory, saveUserHistory } from "../memory";
 import { generateText } from "../ai";
+import { logger } from "../logger";
 
-export async function handleDirectMessage(message: Message, persona: string): Promise<void> {
+export async function handleDirectMessage(message: Message): Promise<void> {
 	try {
 		if (message.author.bot || !message.channel || message.channel.type !== ChannelType.DM) {
 			return;
 		}
 		await message.channel.sendTyping();
-		console.log(`Received DM from ${message.author.tag}: ${message.content}`);
+		logger.log(`Received DM from ${message.author.tag}: ${message.content}`);
 
 		const userId = message.author.id;
 		const userHistory = await getUserHistory(userId);
 
 		appendToHistory(userHistory, "user", message.content);
 
-		const fullText = await generateText(persona, userHistory);
+		const fullText = await generateText(userHistory);
 
 		if (fullText) {
 			appendToHistory(userHistory, "model", fullText);
@@ -74,7 +75,9 @@ export async function handleDirectMessage(message: Message, persona: string): Pr
 			} else {
 				for (let i = 0; i < codeContent.length; i += chunkSize) {
 					await message.channel.send(
-						`\`\`\`${language}\n${codeContent.substring(i, i + chunkSize)}\n\`\`\``
+						`\`\`\`${language}
+${codeContent.substring(i, i + chunkSize)}
+\`\`\``
 					);
 				}
 			}
@@ -91,9 +94,9 @@ export async function handleDirectMessage(message: Message, persona: string): Pr
 				await message.channel.send(textToSend.substring(i, i + chunkSize));
 			}
 		}
-		console.log(`Sent response to ${message.author.tag}`);
+		logger.log(`Sent response to ${message.author.tag}`);
 	} catch (error) {
-		console.error(`Error processing message from ${message.author.tag}:`, error);
+		logger.error(`Error processing message from ${message.author.tag}:`, error);
 		await message.reply("Sorry, I encountered an error. Please try again later.");
 	}
 }
