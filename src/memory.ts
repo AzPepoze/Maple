@@ -11,11 +11,12 @@ const MEMORY_PATH = path.join("data", "memory.json");
 // Types
 //-------------------------------------------------------
 export interface ChatPart {
-	text: string;
+	text?: string;
+	functionResponse?: { name: string; response: { content: string } };
 }
 
 export interface ChatContent {
-	role: "user" | "model";
+	role: "user" | "model" | "function";
 	parts: ChatPart[];
 }
 
