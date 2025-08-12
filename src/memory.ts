@@ -4,7 +4,7 @@ import * as path from "path";
 //-------------------------------------------------------
 // Constants
 //-------------------------------------------------------
-const MEMORY_PATH = path.join("cache", "memory.json");
+const MEMORY_PATH = path.join("data", "memory.json");
 
 //-------------------------------------------------------
 // Types
@@ -34,6 +34,7 @@ async function loadMemory(): Promise<Memory> {
 		return data ? (JSON.parse(data) as Memory) : {};
 	} catch (error: any) {
 		if (error.code === "ENOENT") {
+			await fs.writeFile(MEMORY_PATH, JSON.stringify({}, null, 2), "utf-8");
 			return {};
 		}
 		console.error("Error reading or parsing memory.json:", error);
@@ -54,16 +55,16 @@ async function saveMemory(memory: Memory): Promise<void> {
 // Public History Functions
 //-------------------------------------------------------
 export async function getUserHistory(userId: string): Promise<ChatHistory> {
-    const memory = await loadMemory();
-    return memory[userId] || [];
+	const memory = await loadMemory();
+	return memory[userId] || [];
 }
 
 export function appendToHistory(history: ChatHistory, role: "user" | "model", text: string): void {
-    history.push({ role, parts: [{ text }] });
+	history.push({ role, parts: [{ text }] });
 }
 
 export async function saveUserHistory(userId: string, history: ChatHistory): Promise<void> {
-    const memory = await loadMemory();
-    memory[userId] = history;
-    await saveMemory(memory);
+	const memory = await loadMemory();
+	memory[userId] = history;
+	await saveMemory(memory);
 }

@@ -16,8 +16,7 @@ FROM node:23-alpine
 WORKDIR /app
 
 COPY --from=build /app/dist ./dist
-COPY data/ ./data/
-COPY cache/ ./cache/
+COPY data/ ./data
 COPY tsconfig.json tsconfig.json
 
 CMD ["node", "./dist/index.js"]
