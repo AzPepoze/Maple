@@ -9,7 +9,7 @@ import { OllamaAI } from "./ai/ollama";
 //-------------------------------------------------------
 const aiProvider = process.env.AI_PROVIDER || "GEMINI"; // Default to GEMINI
 const geminiApiKey = process.env.GEMINI_API_KEY;
-const geminiModel = process.env.GEMINI_MODEL || "gemini-pro";
+const geminiModel = process.env.GEMINI_MODEL ? process.env.GEMINI_MODEL.split(',') : ["gemini-2.5-flash"];
 const geminiModelFallback = process.env.GEMINI_MODEL_FALLBACK || "gemini-pro-vision";
 const ollamaBaseUrl = process.env.OLLAMA_BASE_URL || "http://localhost:11434";
 const ollamaModel = process.env.OLLAMA_MODEL || "llama2";

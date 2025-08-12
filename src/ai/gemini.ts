@@ -8,16 +8,16 @@ import { AIProvider } from "../ai"; // Assuming AIProvider is in ai.ts
 //-------------------------------------------------------
 export class GeminiAI implements AIProvider {
 	private genAI: GoogleGenAI;
-	private primaryModel: string;
+	private primaryModels: string[]; // Changed from primaryModel: string
 	private fallbackModel: string;
-	private currentModel: string;
+	private currentModelIndex: number = 0; // New: to track current primary model index
 	private useFallback: boolean = false; // Flag to indicate if fallback should be used for the next request
 
-	constructor(apiKey: string, primaryModel: string, fallbackModel: string) {
+	constructor(apiKey: string, primaryModels: string[], fallbackModel: string) { // Changed primaryModel to primaryModels
 		this.genAI = new GoogleGenAI({ apiKey });
-		this.primaryModel = primaryModel;
+		this.primaryModels = primaryModels;
 		this.fallbackModel = fallbackModel;
-		this.currentModel = primaryModel; // Start with the primary model
+		this.currentModelIndex = 0; // Start with the first primary model
 	}
 
 	private async _generateContentStream(model: string, history: ChatHistory, persona: string): Promise<string> {
@@ -34,52 +34,70 @@ export class GeminiAI implements AIProvider {
 		return fullText;
 	}
 
-	async generateText(history: ChatHistory): Promise<string> {
+		async generateText(history: ChatHistory): Promise<string> {
 		const persona = await loadPersona();
-		let modelToUse = this.currentModel;
+		let modelToUse: string;
 
 		if (this.useFallback) {
 			modelToUse = this.fallbackModel;
 			this.useFallback = false; // Reset the flag
+		} else {
+			modelToUse = this.primaryModels[this.currentModelIndex];
 		}
 
 		try {
 			const fullText = await this._generateContentStream(modelToUse, history, persona);
-			this.currentModel = this.primaryModel; // If successful, revert to primary model for next request
+			this.currentModelIndex = 0; // If successful, reset to the first primary model for next request
 			return fullText;
 		} catch (error) {
 			console.error(`Error generating text with model ${modelToUse}:`, error);
-			// If primary model failed and fallback model is available, try fallback immediately
-			if (modelToUse === this.primaryModel && this.fallbackModel) {
-				console.warn(
-					`Primary model (${this.primaryModel}) failed. Attempting to use fallback model (${this.fallbackModel}).`
-				);
-				this.currentModel = this.fallbackModel; // Switch to fallback for this attempt
+
+			// Try next primary model if available
+			if (!this.useFallback && this.currentModelIndex < this.primaryModels.length - 1) {
+				this.currentModelIndex++;
+				const nextPrimaryModel = this.primaryModels[this.currentModelIndex];
+				console.warn(`Primary model (${modelToUse}) failed. Attempting next primary model (${nextPrimaryModel}).`);
+				// Retry with the next primary model immediately
+				try {
+					const fullText = await this._generateContentStream(nextPrimaryModel, history, persona);
+					this.currentModelIndex = 0; // If successful, reset to the first primary model for next request
+					return fullText;
+				} catch (nextPrimaryError) {
+					console.error(`Next primary model (${nextPrimaryModel}) also failed:`, nextPrimaryError);
+					// If next primary model also fails, proceed to fallback logic
+				}
+			}
+
+			// If all primary models failed or no more primary models, try fallback model
+			if (this.fallbackModel) {
+				console.warn(`All primary models failed or no more primary models. Attempting to use fallback model (${this.fallbackModel}).`);
+				this.useFallback = true; // Set flag to use fallback for the next request
 				try {
 					const fullText = await this._generateContentStream(this.fallbackModel, history, persona);
-					this.currentModel = this.primaryModel; // If fallback successful, revert to primary for next request
+					this.currentModelIndex = 0; // If fallback successful, reset to the first primary model for next request
+					this.useFallback = false; // Reset fallback flag
 					return fullText;
 				} catch (fallbackError) {
 					console.error(`Fallback model (${this.fallbackModel}) also failed:`, fallbackError);
 					throw fallbackError; // Re-throw if fallback also failed
 				}
 			} else {
-				throw error; // Re-throw if no fallback or fallback was already used and failed
+				throw error; // Re-throw if no fallback model
 			}
 		}
 	}
 
 	async countTokens(text: string): Promise<number> {
 		const result = await this.genAI.models.countTokens({
-			model: this.currentModel, // Changed from AI_MODEL
+			model: this.primaryModels[this.currentModelIndex], // Changed to use current primary model
 			contents: [{ role: "user", parts: [{ text: text }] }],
 		});
 		return result.totalTokens ?? 0;
 	}
 
-	async isSafeContent(text: string): Promise<boolean> {
+		async isSafeContent(text: string): Promise<boolean> {
 		const result = await this.genAI.models.generateContent({
-			model: this.currentModel, // Changed from AI_MODEL
+			model: this.primaryModels[this.currentModelIndex], // Changed to use current primary model
 			contents: [{ role: "user", parts: [{ text: text }] }],
 		});
 		const safetyRatings = result.promptFeedback?.safetyRatings;
@@ -90,7 +108,7 @@ export class GeminiAI implements AIProvider {
 
 		// Check if any safety rating is HIGH or MED
 		const isUnsafe = safetyRatings.some(
-			(rating) => rating.probability === "HIGH" || rating.probability === "MEDIUM"
+			rating => rating.probability === "HIGH" || rating.probability === "MEDIUM"
 		);
 		return !isUnsafe;
 	}
