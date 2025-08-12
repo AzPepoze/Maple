@@ -9,6 +9,8 @@ import { OllamaAI } from "./ai/ollama";
 //-------------------------------------------------------
 const aiProvider = process.env.AI_PROVIDER || "GEMINI"; // Default to GEMINI
 const geminiApiKey = process.env.GEMINI_API_KEY;
+const geminiModel = process.env.GEMINI_MODEL || "gemini-pro";
+const geminiModelFallback = process.env.GEMINI_MODEL_FALLBACK || "gemini-pro-vision";
 const ollamaBaseUrl = process.env.OLLAMA_BASE_URL || "http://localhost:11434";
 const ollamaModel = process.env.OLLAMA_MODEL || "llama2";
 
@@ -35,7 +37,7 @@ export interface AIProvider {
 let currentAI: AIProvider;
 
 if (aiProvider === "GEMINI") {
-    currentAI = new GeminiAI(geminiApiKey!);
+    currentAI = new GeminiAI(geminiApiKey!, geminiModel, geminiModelFallback);
     logger.info("Using Gemini AI provider.");
 } else if (aiProvider === "OLLAMA") {
     currentAI = new OllamaAI(ollamaBaseUrl!, ollamaModel);
