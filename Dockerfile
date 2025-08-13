@@ -1,4 +1,4 @@
-FROM node:23-alpine AS base
+FROM node:24-alpine AS base
 WORKDIR /app
 RUN npm i -g pnpm
 
@@ -24,7 +24,7 @@ RUN pnpm run build
 WORKDIR /app/src/backend
 RUN pnpm prune --prod
 
-FROM node:23-alpine
+FROM node:24-alpine
 WORKDIR /app
 
 # Copy built artifacts and production node_modules
