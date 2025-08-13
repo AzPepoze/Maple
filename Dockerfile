@@ -22,7 +22,7 @@ RUN pnpm run build
 
 # Prune production dependencies
 WORKDIR /app/src/backend
-# RUN pnpm prune --prod
+RUN pnpm prune --prod
 
 FROM node:23-alpine
 WORKDIR /app
