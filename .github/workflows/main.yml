@@ -25,4 +25,4 @@ jobs:
                     context: .
                     file: ./Dockerfile
                     push: true
-                    tags: ghcr.io/${{ github.actor }}/maple-backend:latest
+                    tags: ghcr.io/azpepoze/maple-backend:latest
