@@ -34,62 +34,43 @@ export async function handleDirectMessage(message: Message): Promise<void> {
 		const textToSend = fullText || "...";
 		const chunkSize = 2000;
 
-		const codeBlockStart = textToSend.indexOf("```");
-		const codeBlockEnd = textToSend.indexOf("```", codeBlockStart + 3);
+		const parts = textToSend.split(/(```[\s\S]*?```)/g);
 
-		if (codeBlockStart !== -1 && codeBlockEnd !== -1) {
-			const textBefore = textToSend.substring(0, codeBlockStart).trim();
-			const codeBlockContent = textToSend.substring(codeBlockStart, codeBlockEnd + 3).trim();
-			const textAfter = textToSend.substring(codeBlockEnd + 3).trim();
-
-			if (textBefore.length > 0) {
-				for (let i = 0; i < textBefore.length; i += chunkSize) {
-					await message.channel.send(textBefore.substring(i, i + chunkSize));
-				}
+		for (const part of parts) {
+			if (!part || part.trim() === "") {
+				continue;
 			}
 
-			const firstNewlineIndex = codeBlockContent.indexOf("\n");
-			let language = "txt";
-			let codeContent = codeBlockContent;
+			if (part.startsWith("```") && part.endsWith("```")) {
+				const codeBlock = part;
 
-			if (firstNewlineIndex !== -1) {
-				const langPart = codeBlockContent.substring(3, firstNewlineIndex).trim();
-				if (langPart) {
-					language = langPart;
+				const langMatch = codeBlock.match(/^```(\w*)\n/);
+				const language = langMatch && langMatch[1] ? langMatch[1] : "txt";
+				const codeContent = codeBlock
+					.replace(/^```(\w*)\n?/, "")
+					.replace(/```$/, "")
+					.trim();
+
+				if (codeBlock.length > chunkSize) {
+					const buffer = Buffer.from(codeContent, "utf-8");
+					await message.channel.send({
+						files: [
+							{
+								attachment: buffer,
+								name: `code.${language}`,
+							},
+						],
+					});
+				} else {
+					await message.channel.send(codeBlock);
 				}
-				codeContent = codeBlockContent.substring(firstNewlineIndex + 1);
 			} else {
-				codeContent = codeBlockContent.substring(3);
-			}
-
-			codeContent = codeContent.substring(0, codeContent.lastIndexOf("```")).trim();
-
-			if (codeContent.length > chunkSize) {
-				const buffer = Buffer.from(codeContent, "utf-8");
-				await message.channel.send({
-					files: [
-						{
-							attachment: buffer,
-							name: `code_block.${language}`,
-						},
-					],
-				});
-			} else {
-				for (let i = 0; i < codeContent.length; i += chunkSize) {
-					await message.channel.send(
-						`\`\`\`${language}\n${codeContent.substring(i, i + chunkSize)}\n\`\`\``
-					);
+				const textPart = part;
+				if (textPart.length > 0) {
+					for (let i = 0; i < textPart.length; i += chunkSize) {
+						await message.channel.send(textPart.substring(i, i + chunkSize));
+					}
 				}
-			}
-
-			if (textAfter.length > 0) {
-				for (let i = 0; i < textAfter.length; i += chunkSize) {
-					await message.channel.send(textAfter.substring(i, i + chunkSize));
-				}
-			}
-		} else {
-			for (let i = 0; i < textToSend.length; i += chunkSize) {
-				await message.channel.send(textToSend.substring(i, i + chunkSize));
 			}
 		}
 		logger.log(`Sent response to ${message.author.tag}`);
