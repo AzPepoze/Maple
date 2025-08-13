@@ -31,7 +31,7 @@ export function startWebServer(options: ServerOptions) {
 				{ url: "http://localhost:3000" }, // Assuming default port 3000
 			],
 		},
-		apis: ["./dist/backend/server.js"], // Path to the API routes file
+		apis: ["dist/backend/server.js"], // Path to the API routes file
 	};
 
 	const swaggerSpec = swaggerJSDoc(swaggerOptions);
@@ -138,9 +138,9 @@ export function startWebServer(options: ServerOptions) {
 	});
 
 	// SPA fallback
-	app.get("*", (req: Request, res: Response) => {
-		res.sendFile(path.join(__dirname, "..", "..", "dist", "frontend", "index.html"));
-	});
+	// app.get("*", (req: Request, res: Response) => {
+	// 	res.sendFile(path.join(__dirname, "..", "..", "dist", "frontend", "index.html"));
+	// });
 
 	httpServer.listen(options.port, () => {
 		logger.log(`Web interface listening on http://localhost:${options.port}`);
