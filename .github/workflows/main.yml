@@ -9,7 +9,7 @@ jobs:
      build-and-push-docker-image:
           runs-on: ubuntu-latest
           permissions:
-               packages: write # Grant write permissions for packages
+               packages: write
           steps:
              - name: Checkout repository
                uses: actions/checkout@v4
