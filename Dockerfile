@@ -10,7 +10,7 @@ WORKDIR /app
 
 COPY . .
 
-RUN pnpm run build && pnpm prune --prod
+RUN pnpm install --filter src/frontend && pnpm run build && pnpm prune --prod
 
 FROM node:23-alpine
 WORKDIR /app
