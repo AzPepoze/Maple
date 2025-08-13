@@ -1,7 +1,7 @@
 services:
      maple-bot:
-          image: ghcr.io/azpepoze/maple:latest
-          container_name: maple_bot
+          build: .
+          container_name: maple
           restart: unless-stopped
           env_file:
              - .env
@@ -10,11 +10,3 @@ services:
              - "${WEB_SERVER_PORT}:${WEB_SERVER_PORT}"
           volumes:
              - ./data:/app/data
-
-     watchtower:
-          image: containrrr/watchtower
-          container_name: watchtower
-          volumes:
-             - /var/run/docker.sock:/var/run/docker.sock
-          command: --interval 300 maple_bot
-          restart: unless-stopped
