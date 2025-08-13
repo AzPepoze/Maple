@@ -1,5 +1,5 @@
 import { Client } from "discord.js";
-import { logger } from "../logger";
+import { logger } from "../utils/logger";
 
 export async function sendDM(discordClient: Client, userId: string, message: string): Promise<{ success: boolean; error?: string }> {
     try {

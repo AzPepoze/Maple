@@ -4,8 +4,8 @@ import path from "path";
 import { Client } from "discord.js";
 import swaggerUi from "swagger-ui-express";
 import swaggerJSDoc from "swagger-jsdoc";
-import { logger } from "../logger";
-import { sendDM } from "../discord/command";
+import { logger } from "./utils/logger";
+import { sendDM } from "./discord/command";
 
 interface ServerOptions {
 	port: number;
@@ -16,7 +16,7 @@ export function startWebServer(options: ServerOptions) {
 	const app = express();
 	const httpServer = createServer(app);
 
-	app.use(express.static(path.join(__dirname, "public")));
+	app.use(express.static(path.join(__dirname, "..", "src-frontend", "build")));
 	app.use(express.json()); // Enable JSON body parsing
 
 	const swaggerOptions = {
@@ -31,7 +31,7 @@ export function startWebServer(options: ServerOptions) {
 				{ url: "http://localhost:3000" }, // Assuming default port 3000
 			],
 		},
-		apis: ["./src/web/server.ts"], // Path to the API routes file
+		apis: ["./src-backend/server.ts"], // Path to the API routes file
 	};
 
 	const swaggerSpec = swaggerJSDoc(swaggerOptions);
@@ -135,6 +135,11 @@ export function startWebServer(options: ServerOptions) {
 		} else {
 			res.status(500).json({ status: "Error", error: result.error });
 		}
+	});
+
+	// SPA fallback
+	app.get('*', (req: Request, res: Response) => {
+	res.sendFile(path.join(__dirname, "..", "..", "dist", "frontend", "index.html"));
 	});
 
 	httpServer.listen(options.port, () => {

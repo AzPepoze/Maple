@@ -1,11 +1,11 @@
 import { ChatHistory } from "./memory";
-import { logger } from "./logger";
+import { logger } from "../utils/logger";
 
 // This file handles AI-related functionalities.
 
-import { loadPersona } from "./ai/utils";
-import { GeminiAI } from "./ai/gemini";
-import { OllamaAI } from "./ai/ollama";
+import { loadPersona } from "./utils";
+import { GeminiAI } from "./providers/gemini";
+import { OllamaAI } from "./providers/ollama";
 
 //-------------------------------------------------------
 // Environment Variable Validation

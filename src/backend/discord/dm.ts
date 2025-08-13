@@ -1,7 +1,7 @@
 import { Message, ChannelType } from "discord.js";
-import { getUserHistory, appendToHistory, saveUserHistory } from "../memory";
+import { getUserHistory, appendToHistory, saveUserHistory } from "../ai/memory";
 import { generateText } from "../ai";
-import { logger } from "../logger";
+import { logger } from "../utils/logger";
 
 export async function handleDirectMessage(message: Message): Promise<void> {
 	try {

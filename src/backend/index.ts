@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { startDiscordBot, client } from "./discord";
-import { logger } from "./logger"; // Import logger
-import { startWebServer } from "./web/server"; // Import web server
+import { logger } from "./utils/logger"; // Import logger
+import { startWebServer } from "./server"; // Import web server
 import * as fs from 'fs';
 
 //-------------------------------------------------------

@@ -1,9 +1,9 @@
 import { GoogleGenAI } from "@google/genai";
 import { ChatHistory } from "../memory";
-import { loadPersona } from "./utils";
-import { AIProvider } from "../ai"; // Assuming AIProvider is in ai.ts
-import * as externalTools from "./tools";
-import { toolDefinitions } from "./tools";
+import { loadPersona } from "../utils";
+import { AIProvider } from "../index"; // Assuming AIProvider is in ai.ts
+import * as externalTools from "../tools";
+import { toolDefinitions } from "../tools";
 
 export class GeminiAI implements AIProvider {
 	private genAI: GoogleGenAI;

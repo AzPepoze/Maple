@@ -1,7 +1,7 @@
 import { ChatHistory } from "../memory";
-import { logger } from '../logger';
-import { loadPersona } from "./utils";
-import { AIProvider } from "../ai"; // Assuming AIProvider is in ai.ts
+import { logger } from "../../utils/logger";
+import { loadPersona } from "../utils";
+import { AIProvider } from "../index"; // Assuming AIProvider is in ai.ts
 
 //-------------------------------------------------------
 // Constants

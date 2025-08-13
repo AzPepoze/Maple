@@ -4,9 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "ts-node src/index.ts",
-    "build": "tsc && pnpm run copy-web-assets",
-    "copy-web-assets": "cp -R src/web/public dist/web/",
+    "start": "ts-node src/backend/index.ts",
+    "build": "tsc && pnpm --prefix src/frontend run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
