@@ -24,7 +24,7 @@ RUN pnpm --filter src/backend run build
 RUN pnpm --filter src/frontend run build
 
 # Prune production dependencies
-RUN pnpm prune --prod
+RUN pnpm --filter src/backend prune --prod
 
 FROM node:23-alpine
 WORKDIR /app
