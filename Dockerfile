@@ -26,8 +26,6 @@ WORKDIR /app/src/frontend
 RUN pnpm run build
 
 # Prune production dependencies
-WORKDIR /app/src/backend
-RUN pnpm prune --prod
 WORKDIR /app
 
 FROM node:23-alpine
@@ -35,6 +33,7 @@ WORKDIR /app
 
 # Copy built artifacts and production node_modules
 COPY --from=build /app/dist ./dist
-COPY --from=build /app/src/backend/node_modules ./node_modules
+COPY --from=build /app/src/backend/package.json package.json
+RUN pnpm install --prod
 
 CMD ["node", "./dist/backend/index.js"]
