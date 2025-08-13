@@ -1,14 +1,20 @@
 services:
      maple-bot:
-          build:
-               context: .
-               dockerfile: Dockerfile
+          image: ghcr.io/AzPepoze/Maple-Backend:latest
           container_name: maple_bot
           restart: unless-stopped
           env_file:
-               - .env # Load environment variables from .env file
+             - .env
           network_mode: "host"
           ports:
-               - "${WEB_SERVER_PORT}:${WEB_SERVER_PORT}"
+             - "${WEB_SERVER_PORT}:${WEB_SERVER_PORT}"
           volumes:
              - ./data:/app/data
+
+     watchtower:
+          image: containrrr/watchtower
+          container_name: watchtower
+          volumes:
+             - /var/run/docker.sock:/var/run/docker.sock
+          command: --interval 300 maple_bot
+          restart: unless-stopped
