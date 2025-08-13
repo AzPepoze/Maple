@@ -20,8 +20,10 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 
 # Build frontend and backend
-RUN pnpm --filter src/backend run build
-RUN pnpm --filter src/frontend run build
+WORKDIR /app/src/backend
+RUN pnpm run build
+WORKDIR /app/src/frontend
+RUN pnpm run build
 
 # Prune production dependencies
 WORKDIR /app/src/backend
