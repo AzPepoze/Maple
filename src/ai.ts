@@ -1,5 +1,8 @@
 import { ChatHistory } from "./memory";
-import { logger } from './logger'; // Import logger
+import { logger } from "./logger";
+
+// This file handles AI-related functionalities.
+
 import { loadPersona } from "./ai/utils";
 import { GeminiAI } from "./ai/gemini";
 import { OllamaAI } from "./ai/ollama";
