@@ -1,0 +1,31 @@
+{
+	"name": "maple-backend",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"start": "ts-node src/backend/index.ts",
+		"build": "tsc",
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"packageManager": "pnpm@10.14.0",
+	"dependencies": {
+		"@google/genai": "^1.13.0",
+		"discord.js": "^14.21.0",
+		"dotenv": "^17.2.1",
+		"express": "^5.1.0",
+		"swagger-ui-express": "^5.0.1",
+		"swagger-jsdoc": "^6.2.8"
+	},
+	"devDependencies": {
+		"@types/express": "^5.0.3",
+		"@types/node": "^24.2.1",
+		"ts-node": "^10.9.2",
+		"typescript": "^5.9.2",
+		"@types/swagger-ui-express": "^4.1.6",
+		"@types/swagger-jsdoc": "^6.0.4"
+	}
+}
