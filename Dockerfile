@@ -14,10 +14,10 @@ COPY . .
 
 # Build frontend and backend
 WORKDIR /app/src/backend
-RUN pnpm i
+RUN pnpm i -f
 RUN pnpm run build
 WORKDIR /app/src/frontend
-RUN pnpm i
+RUN pnpm i -f
 RUN pnpm run build
 
 # Prune production dependencies

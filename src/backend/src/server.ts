@@ -16,7 +16,7 @@ export function startWebServer(options: ServerOptions) {
 	const app = express();
 	const httpServer = createServer(app);
 
-	app.use(express.static(path.join(__dirname, "..", "frontend")));
+	app.use(express.static(path.join(__dirname, "..", "..", "dist", "frontend")));
 	app.use(express.json()); // Enable JSON body parsing
 
 	const swaggerOptions = {
