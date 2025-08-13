@@ -1,6 +1,6 @@
 services:
      maple-bot:
-          image: ghcr.io/AzPepoze/Maple-Backend:latest
+          image: ghcr.io/AzPepoze/maple-backend:latest
           container_name: maple_bot
           restart: unless-stopped
           env_file:
