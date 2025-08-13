@@ -1,15 +1,15 @@
 import * as fs from "fs/promises";
-import * as path from "path";
 import { logger } from "../utils/logger";
+import { PERSONA_PATH } from "../../config";
 
-//-------------------------------------------------------
+//-------------------------------------------------------//
 // Constants
-//-------------------------------------------------------
-const PERSONA_PATH = path.join(__dirname, "..", "..", "data", "persona.md");
+//-------------------------------------------------------//
+// PERSONA_PATH is now imported from config.ts
 
-//-------------------------------------------------------
+//-------------------------------------------------------//
 // Helper Functions
-//-------------------------------------------------------
+//-------------------------------------------------------//
 export async function loadPersona(): Promise<string> {
 	try {
 		return await fs.readFile(PERSONA_PATH, "utf-8");

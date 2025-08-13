@@ -1,11 +1,12 @@
 import * as fs from "fs/promises";
 import * as path from "path";
 import { logger } from "../utils/logger";
+import { MEMORY_PATH } from "../../config";
 
 //-------------------------------------------------------
 // Constants
 //-------------------------------------------------------
-const MEMORY_PATH = path.join("data", "memory.json");
+// MEMORY_PATH is now imported from config.ts
 
 //-------------------------------------------------------
 // Types
