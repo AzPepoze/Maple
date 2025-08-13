@@ -11,6 +11,6 @@
 		"resolveJsonModule": true,
 		"moduleResolution": "node"
 	},
-	"include": ["src/**/*"],
+	"include": ["src/backend/**/*"],
 	"exclude": ["node_modules"]
 }
