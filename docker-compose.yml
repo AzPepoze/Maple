@@ -1,5 +1,5 @@
 services:
-     maple-bot:
+     maple:
           build: .
           container_name: maple
           restart: unless-stopped
