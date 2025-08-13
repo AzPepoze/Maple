@@ -10,7 +10,9 @@ WORKDIR /app
 
 COPY . .
 
-RUN pnpm install --frozen-lockfile && pnpm --filter src/frontend run build && pnpm prune --prod
+RUN pnpm install --frozen-lockfile
+RUN pnpm run build
+RUN pnpm prune --prod
 
 FROM node:23-alpine
 WORKDIR /app
