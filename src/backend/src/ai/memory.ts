@@ -1,7 +1,7 @@
 import * as fs from "fs/promises";
 import * as path from "path";
 import { logger } from "../utils/logger";
-import { MEMORY_PATH } from "../../config";
+import { MEMORY_PATH } from "../config";
 
 //-------------------------------------------------------
 // Constants

@@ -1,6 +1,6 @@
 import * as fs from "fs/promises";
 import { logger } from "../utils/logger";
-import { PERSONA_PATH } from "../../config";
+import { PERSONA_PATH } from "../config";
 
 //-------------------------------------------------------//
 // Constants
