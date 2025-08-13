@@ -1,6 +1,6 @@
 import { Client, GatewayIntentBits, Partials, Message } from "discord.js";
 import { handleDirectMessage } from "./dm";
-import { logger } from "../utils/logger"; // Import logger
+import { logger } from "../utils/logger";
 
 //-------------------------------------------------------
 // Environment Variable Validation

@@ -1,20 +1,19 @@
 import { GoogleGenAI } from "@google/genai";
 import { ChatHistory } from "../memory";
 import { loadPersona } from "../utils";
-import { AIProvider } from "../index"; // Assuming AIProvider is in ai.ts
+import { AIProvider } from "../index";
 import * as externalTools from "../tools";
 import { toolDefinitions } from "../tools";
 
 export class GeminiAI implements AIProvider {
 	private genAI: GoogleGenAI;
-	private primaryModels: string[]; // Changed from primaryModel: string
-	private currentModelIndex: number = 0; // New: to track current primary model index
+	private primaryModels: string[];
+	private currentModelIndex: number = 0;
 
 	constructor(apiKey: string, primaryModels: string[]) {
-		// Changed primaryModel to primaryModels
 		this.genAI = new GoogleGenAI({ apiKey });
 		this.primaryModels = primaryModels;
-		this.currentModelIndex = 0; // Start with the first primary model
+		this.currentModelIndex = 0;
 	}
 
 	private async _generateContentStream(
@@ -35,13 +34,12 @@ export class GeminiAI implements AIProvider {
 		const responseStream = await this.genAI.models.generateContentStream(request);
 
 		let fullText = "";
-		let functionCall: any = null; // To store function call if present
+		let functionCall: any = null;
 
 		for await (const chunk of responseStream) {
 			if (chunk.text) {
 				fullText += chunk.text;
 			}
-			// Check for function calls within parts of the chunk
 			if (
 				chunk.candidates &&
 				chunk.candidates.length > 0 &&
@@ -51,12 +49,12 @@ export class GeminiAI implements AIProvider {
 				for (const part of chunk.candidates[0].content.parts) {
 					if (part.functionCall) {
 						functionCall = part.functionCall;
-						break; // Assuming only one function call per chunk for simplicity
+						break;
 					}
 				}
 			}
 		}
-		return { fullText, functionCall }; // Return both text and function call
+		return { fullText, functionCall };
 	}
 
 	private async _processGenerateContentResponse(
@@ -71,7 +69,6 @@ export class GeminiAI implements AIProvider {
 			const { name, args } = functionCall;
 			let toolResult: string;
 
-			// Execute the tool based on its name
 			if (name === "searchWeb") {
 				toolResult = await externalTools.searchWeb(args.query);
 			} else if (name === "fetchWebPage") {
@@ -82,12 +79,11 @@ export class GeminiAI implements AIProvider {
 				toolResult = `Error: Unknown tool '${name}'`;
 			}
 
-			// Add tool response to history and call generateText again
 			history.push({
 				role: "function",
 				parts: [{ functionResponse: { name, response: { content: toolResult } } }],
 			});
-			return this.generateText(history); // Recursive call for multi-turn
+			return this.generateText(history);
 		}
 		return fullText;
 	}
@@ -98,12 +94,11 @@ export class GeminiAI implements AIProvider {
 
 		try {
 			const result = await this._processGenerateContentResponse(modelToUse, history, persona, toolDefinitions);
-			this.currentModelIndex = 0; // If successful, reset to the first primary model for next request
+			this.currentModelIndex = 0;
 			return result;
 		} catch (error) {
 			console.error(`Error generating text with model ${modelToUse}:`, error);
 
-			// Try next primary model if available
 			if (this.currentModelIndex < this.primaryModels.length - 1) {
 				this.currentModelIndex++;
 				const nextPrimaryModel = this.primaryModels[this.currentModelIndex];
@@ -112,21 +107,21 @@ export class GeminiAI implements AIProvider {
 				);
 				try {
 					const result = await this._processGenerateContentResponse(nextPrimaryModel, history, persona, toolDefinitions);
-					this.currentModelIndex = 0; // If successful, reset to the first primary model for next request
+					this.currentModelIndex = 0;
 					return result;
 				} catch (nextPrimaryError) {
 					console.error(`Next primary model (${nextPrimaryModel}) also failed:`, nextPrimaryError);
-					throw nextPrimaryError; // Re-throw if next primary also failed
+					throw nextPrimaryError;
 				}
 			} else {
-				throw error; // Re-throw if no more primary models
+				throw error;
 			}
 		}
 	}
 
 	async countTokens(text: string): Promise<number> {
 		const result = await this.genAI.models.countTokens({
-			model: this.primaryModels[this.currentModelIndex], // Changed to use current primary model
+			model: this.primaryModels[this.currentModelIndex],
 			contents: [{ role: "user", parts: [{ text: text }] }],
 		});
 		return result.totalTokens ?? 0;
@@ -134,16 +129,15 @@ export class GeminiAI implements AIProvider {
 
 	async isSafeContent(text: string): Promise<boolean> {
 		const result = await this.genAI.models.generateContent({
-			model: this.primaryModels[this.currentModelIndex], // Changed to use current primary model
+			model: this.primaryModels[this.currentModelIndex],
 			contents: [{ role: "user", parts: [{ text: text }] }],
 		});
 		const safetyRatings = result.promptFeedback?.safetyRatings;
 
 		if (!safetyRatings) {
-			return true; // No safety ratings, assume safe
+			return true;
 		}
 
-		// Check if any safety rating is HIGH or MED
 		const isUnsafe = safetyRatings.some(
 			(rating) => rating.probability === "HIGH" || rating.probability === "MEDIUM"
 		);

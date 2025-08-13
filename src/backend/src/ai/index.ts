@@ -36,7 +36,7 @@ export interface AIProvider {
 //-------------------------------------------------------
 // AI Provider Factory
 //-------------------------------------------------------
-let currentAI: AIProvider;
+export let currentAI: AIProvider;
 
 if (aiProvider === "GEMINI") {
 	currentAI = new GeminiAI(geminiApiKey!, geminiModel);

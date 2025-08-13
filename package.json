@@ -1,0 +1,9 @@
+{
+	"name": "maple",
+	"scripts": {
+		"run": "npm run build && node dist/backend/index.js",
+		"build": "npm run frontend_build && npm run backend_build",
+		"frontend_build": "cd src/frontend && pnpm run build",
+		"backend_build": "cd src/backend && pnpm run build"
+	}
+}

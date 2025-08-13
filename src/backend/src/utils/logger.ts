@@ -8,10 +8,8 @@ function emitLog(level: string, message: string, ...args: any[]) {
 	const timestamp = new Date().toISOString();
 	const logMessage = `[${timestamp}] [${level.toUpperCase()}] ${message}`;
 
-	// Log to file
 	fs.appendFileSync(LOG_FILE, logMessage + '\n');
 
-	// Also log to console for local debugging
 	if (level === "log") {
 		console.log(logMessage, ...args);
 	} else if (level === "info") {

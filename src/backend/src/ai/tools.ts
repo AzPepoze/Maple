@@ -18,17 +18,17 @@ export const fetchWebPage = async (url: string): Promise<string> => {
     }
 };
 
-export const launchMcpServer = async (serverName: string): Promise<string> => { // Added serverName parameter
+export const launchMcpServer = async (serverName: string): Promise<string> => {
     try {
         const mcpConfigContent = await default_api.read_file({ absolute_path: "/home/azpepoze/GoogleDrive/Project/Tools/Maple/mcp.json" });
         const mcpConfig = JSON.parse(mcpConfigContent.read_file_response.output);
-        const serverConfig = mcpConfig.mcpServers[serverName]; // Dynamic access
+        const serverConfig = mcpConfig.mcpServers[serverName];
 
         if (!serverConfig || !serverConfig.command || !serverConfig.args) {
             throw new Error(`MCP server configuration for '${serverName}' not found or incomplete in mcp.json.`);
         }
 
-        const command = `${serverConfig.command} ${serverConfig.args.join(' ')} &`; // Run in background
+        const command = `${serverConfig.command} ${serverConfig.args.join(' ')} &`;
         const description = `Launching MCP server '${serverName}' in the background.`;
 
         const result = await default_api.run_shell_command({ command, description });

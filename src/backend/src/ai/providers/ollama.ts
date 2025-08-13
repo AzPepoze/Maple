@@ -1,12 +1,12 @@
 import { ChatHistory } from "../memory";
 import { logger } from "../../utils/logger";
 import { loadPersona } from "../utils";
-import { AIProvider } from "../index"; // Assuming AIProvider is in ai.ts
+import { AIProvider } from "../index";
 
 //-------------------------------------------------------
 // Constants
 //-------------------------------------------------------
-const OLLAMA_MODEL = "llama3"; // Default Ollama model, can be made configurable
+const OLLAMA_MODEL = "llama3";
 
 //-------------------------------------------------------
 // Ollama Implementation
@@ -49,21 +49,17 @@ export class OllamaAI implements AIProvider {
         const response = await this.makeRequest("/api/chat", {
             model: this.model,
             messages: messages,
-            system: persona, // Pass persona as system property
+            system: persona,
             stream: false,
         });
         return response.message.content;
     }
 
     async countTokens(text: string): Promise<number> {
-        // Ollama does not have a direct token counting API like Gemini.
-        // This is a rough approximation (average 1 token = 4 characters).
         return Math.ceil(text.length / 4);
     }
 
     async isSafeContent(text: string): Promise<boolean> {
-        // Ollama does not provide built-in safety filtering.
-        // For now, we assume content is safe.
         logger.warn("Ollama does not provide built-in safety filtering. Assuming content is safe.");
         return true;
     }
