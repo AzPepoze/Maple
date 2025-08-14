@@ -5,9 +5,9 @@ import { MEMORY_PATH, MAX_HISTORY_TOKENS } from "../config";
 import { currentAI } from "./index";
 import { loadSummarizePrompt } from "./utils";
 
-//------------------------------------------------------- 
+//-------------------------------------------------------
 // Types
-//------------------------------------------------------- 
+//-------------------------------------------------------
 export interface ChatPart {
 	text?: string;
 	functionResponse?: { name: string; response: { content: string } };
@@ -24,9 +24,9 @@ interface Memory {
 	[userId: string]: ChatHistory;
 }
 
-//------------------------------------------------------- 
+//-------------------------------------------------------
 // Internal Memory Functions
-//------------------------------------------------------- 
+//-------------------------------------------------------
 async function loadMemory(): Promise<Memory> {
 	try {
 		await fs.mkdir(path.dirname(MEMORY_PATH), { recursive: true });
@@ -73,9 +73,9 @@ async function summarizeHistory(history: ChatHistory): Promise<ChatHistory> {
 	}
 }
 
-//------------------------------------------------------- 
+//-------------------------------------------------------
 // Public History Functions
-//------------------------------------------------------- 
+//-------------------------------------------------------
 export async function getUserHistory(userId: string): Promise<ChatHistory> {
 	const memory = await loadMemory();
 	return memory[userId] || [];
@@ -93,7 +93,7 @@ export async function saveUserHistory(userId: string, history: ChatHistory): Pro
 		const currentTokens = await currentAI.countTokens(historyText);
 
 		if (currentTokens > MAX_HISTORY_TOKENS) {
-			logger.info(`History for user ${userId} exceeds ${MAX_HISTORY_TOKENS} tokens (${currentTokens} tokens). Summarizing...`);
+			logger.info(`History for user ${userId} exceeds ${currentTokens} tokens (${currentTokens} tokens). Summarizing...`);
 			history = await summarizeHistory(history);
 		}
 	} else {
@@ -104,3 +104,20 @@ export async function saveUserHistory(userId: string, history: ChatHistory): Pro
 	await saveMemory(memory);
 }
 
+export async function forceSummarizeUserHistory(userId: string): Promise<ChatHistory> {
+    const memory = await loadMemory();
+    let history = memory[userId] || [];
+    if (history.length > 0) {
+        history = await summarizeHistory(history);
+        memory[userId] = history;
+        await saveMemory(memory);
+        return history;
+    }
+    return [];
+}
+
+export async function clearUserHistory(userId: string): Promise<void> {
+    const memory = await loadMemory();
+    memory[userId] = [];
+    await saveMemory(memory);
+}

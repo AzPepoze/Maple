@@ -1,5 +1,5 @@
 import { Message, ChannelType } from "discord.js";
-import { getUserHistory, appendToHistory, saveUserHistory } from "../ai/memory";
+import { getUserHistory, appendToHistory, saveUserHistory, forceSummarizeUserHistory, clearUserHistory, ChatContent, ChatPart } from "../ai/memory";
 import { generateText } from "../ai";
 import { logger } from "../utils/logger";
 
@@ -12,6 +12,27 @@ export async function handleDirectMessage(message: Message): Promise<void> {
 		logger.log(`Received DM from ${message.author.tag}: ${message.content}`);
 
 		const userId = message.author.id;
+		const userMessage = message.content.toLowerCase().trim();
+
+		if (userMessage === "/sum") {
+			const summarizedHistory = await forceSummarizeUserHistory(userId);
+			if (summarizedHistory.length > 0) {
+				const summaryText = summarizedHistory.map((item: ChatContent) => item.parts.map((part: ChatPart) => part.text).join(' ')).join('\n');
+				await message.channel.send(`Your chat history has been summarized:\n\
+\
+${summaryText}\
+\
+			`);
+			} else {
+				await message.channel.send('Your chat history is empty or could not be summarized.');
+			}
+			return;
+		} else if (userMessage === "/clear") {
+			await clearUserHistory(userId);
+			await message.channel.send('Your chat history has been cleared.');
+			return;
+		}
+
 		const userHistory = await getUserHistory(userId);
 
 		appendToHistory(userHistory, "user", message.content);
