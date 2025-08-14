@@ -2,6 +2,7 @@ import { Message, ChannelType } from "discord.js";
 import { getUserHistory, appendToHistory, saveUserHistory, forceSummarizeUserHistory, clearUserHistory, ChatContent, ChatPart } from "../ai/memory";
 import { generateText } from "../ai";
 import { logger } from "../utils/logger";
+import axios from "axios";
 
 export async function handleDirectMessage(message: Message): Promise<void> {
 	try {
@@ -12,9 +13,10 @@ export async function handleDirectMessage(message: Message): Promise<void> {
 		logger.log(`Received DM from ${message.author.tag}: ${message.content}`);
 
 		const userId = message.author.id;
-		const userMessage = message.content.toLowerCase().trim();
+		const userMessageContent = message.content;
+		const userMessageLower = userMessageContent.toLowerCase().trim();
 
-		if (userMessage === "/sum") {
+		if (userMessageLower === "/sum") {
 			const summarizedHistory = await forceSummarizeUserHistory(userId);
 			if (summarizedHistory.length > 0) {
 				const summaryText = summarizedHistory.map((item: ChatContent) => item.parts.map((part: ChatPart) => part.text).join(' ')).join('\n');
@@ -27,7 +29,7 @@ ${summaryText}\
 				await message.channel.send('Your chat history is empty or could not be summarized.');
 			}
 			return;
-		} else if (userMessage === "/clear") {
+		} else if (userMessageLower === "/clear") {
 			await clearUserHistory(userId);
 			await message.channel.send('Your chat history has been cleared.');
 			return;
@@ -35,7 +37,34 @@ ${summaryText}\
 
 		const userHistory = await getUserHistory(userId);
 
-		appendToHistory(userHistory, "user", message.content);
+		const parts: ChatPart[] = [];
+		if (userMessageContent) {
+			parts.push({ text: userMessageContent });
+		}
+
+		for (const attachment of message.attachments.values()) {
+			if (attachment.contentType && attachment.contentType.startsWith("image/")) {
+				try {
+					const response = await axios.get(attachment.url, { responseType: 'arraybuffer' });
+					if (response.status !== 200) {
+						throw new Error(`Failed to fetch image: ${response.statusText}`);
+					}
+					const buffer = Buffer.from(response.data);
+					const base64Data = buffer.toString("base64");
+					parts.push({ inlineData: { mimeType: attachment.contentType, data: base64Data } });
+					logger.log(`Attached image processed: ${attachment.name}`);
+				} catch (error) {
+					logger.error(`Error processing image attachment ${attachment.name}:`, error);
+				}
+			}
+		}
+
+		if (parts.length === 0) {
+			await message.channel.send("Please provide some text or an image.");
+			return;
+		}
+
+		userHistory.push({ role: "user", parts: parts });
 
 		logger.log(`Generating AI response for ${message.author.tag}...`);
 		const startTime = process.hrtime.bigint();
@@ -46,7 +75,7 @@ ${summaryText}\
 		logger.log(`AI response generated for ${message.author.tag} in ${duration.toFixed(2)} ms.`);
 
 		if (fullText) {
-			appendToHistory(userHistory, "model", fullText);
+			userHistory.push({ role: "model", parts: [{ text: fullText }] });
 			await saveUserHistory(userId, userHistory);
 		}
 
@@ -55,9 +84,9 @@ ${summaryText}\
 		const textToSend = fullText || "...";
 		const chunkSize = 2000;
 
-		const parts = textToSend.split(/(```[\s\S]*?```)/g);
+		const partsToSend = textToSend.split(/(```[\s\S]*?```)/g);
 
-		for (const part of parts) {
+		for (const part of partsToSend) {
 			if (!part || part.trim() === "") {
 				continue;
 			}

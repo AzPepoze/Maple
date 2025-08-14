@@ -1,5 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
-import { ChatHistory } from "../memory";
+import { ChatHistory, ChatContent, ChatPart } from "../memory";
 import { loadPersona } from "../utils";
 import { AIProvider } from "../index";
 import * as externalTools from "../tools";
@@ -22,10 +22,24 @@ export class GeminiAI implements AIProvider {
 		persona: string,
 		tools?: any[]
 	): Promise<any> {
+		const contents = history.map((chatContent: ChatContent) => ({
+			role: chatContent.role,
+			parts: chatContent.parts.map((part: ChatPart) => {
+				if (part.text) {
+					return { text: part.text };
+				} else if (part.inlineData) {
+					return { inlineData: part.inlineData };
+				} else if (part.functionResponse) {
+					return { functionResponse: part.functionResponse };
+				}
+				return {};
+			}),
+		}));
+
 		const request: any = {
 			model: model,
 			config: { systemInstruction: persona },
-			contents: history,
+			contents: contents,
 		};
 		if (tools) {
 			request.tools = tools;
@@ -119,10 +133,21 @@ export class GeminiAI implements AIProvider {
 		}
 	}
 
-	async countTokens(text: string): Promise<number> {
+	async countTokens(history: ChatHistory): Promise<number> {
+		const contents = history.map((chatContent: ChatContent) => ({
+			role: chatContent.role,
+			parts: chatContent.parts.map((part: ChatPart) => {
+				if (part.text) {
+					return { text: part.text };
+				} else if (part.inlineData) {
+					return { inlineData: part.inlineData };
+				}
+				return {};
+			}),
+		}));
 		const result = await this.genAI.models.countTokens({
 			model: this.primaryModels[this.currentModelIndex],
-			contents: [{ role: "user", parts: [{ text: text }] }],
+			contents: contents,
 		});
 		return result.totalTokens ?? 0;
 	}

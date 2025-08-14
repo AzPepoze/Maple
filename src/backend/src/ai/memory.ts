@@ -10,6 +10,7 @@ import { loadSummarizePrompt } from "./utils";
 //-------------------------------------------------------
 export interface ChatPart {
 	text?: string;
+	inlineData?: { mimeType: string; data: string };
 	functionResponse?: { name: string; response: { content: string } };
 }
 
@@ -89,8 +90,7 @@ export async function saveUserHistory(userId: string, history: ChatHistory): Pro
 	const memory = await loadMemory();
 
 	if (currentAI) {
-		const historyText = history.map(item => item.parts.map(part => part.text).join(" ")).join(" ");
-		const currentTokens = await currentAI.countTokens(historyText);
+		const currentTokens = await currentAI.countTokens(history);
 
 		if (currentTokens > MAX_HISTORY_TOKENS) {
 			logger.info(`History for user ${userId} exceeds ${currentTokens} tokens (${currentTokens} tokens). Summarizing...`);

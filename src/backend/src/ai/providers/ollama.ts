@@ -55,8 +55,9 @@ export class OllamaAI implements AIProvider {
         return response.message.content;
     }
 
-    async countTokens(text: string): Promise<number> {
-        return Math.ceil(text.length / 4);
+    async countTokens(history: ChatHistory): Promise<number> {
+        const fullText = history.map(item => item.parts.map(part => part.text).join(" ")).join(" ");
+        return Math.ceil(fullText.length / 4);
     }
 
     async isSafeContent(text: string): Promise<boolean> {

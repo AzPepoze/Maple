@@ -29,7 +29,7 @@ if (aiProvider === "OLLAMA" && !ollamaBaseUrl) {
 //-------------------------------------------------------
 export interface AIProvider {
 	generateText(history: ChatHistory): Promise<string>;
-	countTokens(text: string): Promise<number>;
+	countTokens(history: ChatHistory): Promise<number>;
 	isSafeContent(text: string): Promise<boolean>;
 }
 
@@ -38,19 +38,21 @@ export interface AIProvider {
 //-------------------------------------------------------
 export let currentAI: AIProvider;
 
-if (aiProvider === "GEMINI") {
-	currentAI = new GeminiAI(geminiApiKey!, geminiModel);
-	logger.info("Using Gemini AI provider.");
-} else if (aiProvider === "OLLAMA") {
-	currentAI = new OllamaAI(ollamaBaseUrl!, ollamaModel);
-	logger.info(`Using Ollama AI provider with model: ${ollamaModel} at ${ollamaBaseUrl}.`);
-} else {
-	throw new Error(`Unsupported AI_PROVIDER: ${aiProvider}`);
+export function initializeAI() {
+	if (aiProvider === "GEMINI") {
+		currentAI = new GeminiAI(geminiApiKey!, geminiModel);
+		logger.info("Using Gemini AI provider.");
+	} else if (aiProvider === "OLLAMA") {
+		currentAI = new OllamaAI(ollamaBaseUrl!, ollamaModel);
+		logger.info(`Using Ollama AI provider with model: ${ollamaModel} at ${ollamaBaseUrl}.`);
+	} else {
+		throw new Error(`Unsupported AI_PROVIDER: ${aiProvider}`);
+	}
 }
 
 //-------------------------------------------------------
 // Public Functions (Exported from currentAI)
 //-------------------------------------------------------
 export const generateText = (history: ChatHistory) => currentAI.generateText(history);
-export const countTokens = (text: string) => currentAI.countTokens(text);
+export const countTokens = (history: ChatHistory) => currentAI.countTokens(history);
 export const isSafeContent = (text: string) => currentAI.isSafeContent(text);
