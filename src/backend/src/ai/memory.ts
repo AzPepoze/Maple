@@ -60,9 +60,9 @@ async function summarizeHistory(history: ChatHistory): Promise<ChatHistory> {
 
 	logger.info("Summarizing chat history...");
 	const historyToSummarize = history.slice(0, -6);
-	const fullText = historyToSummarize.map(item => item.parts.map(part => part.text).join(" ")).join("\n");
+	const fullText = historyToSummarize.map((item) => item.parts.map((part) => part.text).join(" ")).join("\n");
 	const summarizePromptTemplate = await loadSummarizePrompt();
-	const prompt = summarizePromptTemplate.replace('{history}', fullText);
+	const prompt = summarizePromptTemplate.replace("{history}", fullText);
 
 	try {
 		const summary = await currentAI.generateText([{ role: "user", parts: [{ text: prompt }] }]);
@@ -93,7 +93,9 @@ export async function saveUserHistory(userId: string, history: ChatHistory): Pro
 		const currentTokens = await currentAI.countTokens(history);
 
 		if (currentTokens > MAX_HISTORY_TOKENS) {
-			logger.info(`History for user ${userId} exceeds ${currentTokens} tokens (${currentTokens} tokens). Summarizing...`);
+			logger.info(
+				`History for user ${userId} exceeds ${currentTokens} tokens (${currentTokens} tokens). Summarizing...`
+			);
 			history = await summarizeHistory(history);
 		}
 	} else {
@@ -105,19 +107,19 @@ export async function saveUserHistory(userId: string, history: ChatHistory): Pro
 }
 
 export async function forceSummarizeUserHistory(userId: string): Promise<ChatHistory> {
-    const memory = await loadMemory();
-    let history = memory[userId] || [];
-    if (history.length > 0) {
-        history = await summarizeHistory(history);
-        memory[userId] = history;
-        await saveMemory(memory);
-        return history;
-    }
-    return [];
+	const memory = await loadMemory();
+	let history = memory[userId] || [];
+	if (history.length > 0) {
+		history = await summarizeHistory(history);
+		memory[userId] = history;
+		await saveMemory(memory);
+		return history;
+	}
+	return [];
 }
 
 export async function clearUserHistory(userId: string): Promise<void> {
-    const memory = await loadMemory();
-    memory[userId] = [];
-    await saveMemory(memory);
+	const memory = await loadMemory();
+	memory[userId] = [];
+	await saveMemory(memory);
 }

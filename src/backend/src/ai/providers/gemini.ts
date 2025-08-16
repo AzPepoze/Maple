@@ -77,7 +77,12 @@ export class GeminiAI implements AIProvider {
 		persona: string,
 		toolDefinitions: any[]
 	): Promise<string> {
-		const { fullText, functionCall } = await this._generateContentStream(model, history, persona, toolDefinitions);
+		const { fullText, functionCall } = await this._generateContentStream(
+			model,
+			history,
+			persona,
+			toolDefinitions
+		);
 
 		if (functionCall) {
 			const { name, args } = functionCall;
@@ -120,7 +125,12 @@ export class GeminiAI implements AIProvider {
 					`Primary model (${modelToUse}) failed. Attempting next primary model (${nextPrimaryModel}).`
 				);
 				try {
-					const result = await this._processGenerateContentResponse(nextPrimaryModel, history, persona, toolDefinitions);
+					const result = await this._processGenerateContentResponse(
+						nextPrimaryModel,
+						history,
+						persona,
+						toolDefinitions
+					);
 					this.currentModelIndex = 0;
 					return result;
 				} catch (nextPrimaryError) {
