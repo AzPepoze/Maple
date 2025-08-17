@@ -1,23 +1,25 @@
 import { ChatHistory } from "../memory";
 import { logger } from "../../utils/logger";
-import { loadPersona } from "../utils";
-import { AIProvider } from "../index";
-
-//-------------------------------------------------------
-// Constants
-//-------------------------------------------------------
-const OLLAMA_MODEL = "llama3";
+import { AIProvider } from "../aiProvider";
 
 //-------------------------------------------------------
 // Ollama Implementation
 //-------------------------------------------------------
-export class OllamaAI implements AIProvider {
+export class OllamaAI extends AIProvider {
     private baseUrl: string;
     private model: string;
 
-    constructor(baseUrl: string, model: string) {
-        this.baseUrl = baseUrl;
-        this.model = model;
+    constructor() {
+        super();
+        const ollamaBaseUrl = process.env.OLLAMA_BASE_URL || "http://localhost:11434";
+        const ollamaModel = process.env.OLLAMA_MODEL || "llama2";
+
+        if (!ollamaBaseUrl) {
+            throw new Error("OLLAMA_BASE_URL is not defined in the .env file.");
+        }
+
+        this.baseUrl = ollamaBaseUrl;
+        this.model = ollamaModel;
     }
 
     private async makeRequest(endpoint: string, body: any): Promise<any> {
@@ -40,7 +42,6 @@ export class OllamaAI implements AIProvider {
     }
 
     async generateText(history: ChatHistory): Promise<string> {
-        const persona = await loadPersona();
         const messages = history.map(item => ({
             role: item.role,
             content: item.parts.map(part => part.text).join(" "),
@@ -49,7 +50,7 @@ export class OllamaAI implements AIProvider {
         const response = await this.makeRequest("/api/chat", {
             model: this.model,
             messages: messages,
-            system: persona,
+            system: this.persona,
             stream: false,
         });
         return response.message.content;

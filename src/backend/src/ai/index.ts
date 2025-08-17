@@ -3,51 +3,29 @@ import { logger } from "../utils/logger";
 
 // This file handles AI-related functionalities.
 
-import { loadPersona } from "./utils";
 import { GeminiAI } from "./providers/gemini";
 import { OllamaAI } from "./providers/ollama";
-
-//-------------------------------------------------------
-// Environment Variable Validation
-//-------------------------------------------------------
-const aiProvider = process.env.AI_PROVIDER || "GEMINI"; // Default to GEMINI
-const geminiApiKey = process.env.GEMINI_API_KEY;
-const geminiModel = process.env.GEMINI_MODEL ? process.env.GEMINI_MODEL.split(",") : ["gemini-2.5-flash"];
-const ollamaBaseUrl = process.env.OLLAMA_BASE_URL || "http://localhost:11434";
-const ollamaModel = process.env.OLLAMA_MODEL || "llama2";
-
-if (aiProvider === "GEMINI" && !geminiApiKey) {
-	throw new Error("GEMINI_API_KEY is not defined in the .env file when AI_PROVIDER is GEMINI.");
-}
-
-if (aiProvider === "OLLAMA" && !ollamaBaseUrl) {
-	throw new Error("OLLAMA_BASE_URL is not defined in the .env file when AI_PROVIDER is OLLAMA.");
-}
-
-//-------------------------------------------------------
-// Interfaces
-//-------------------------------------------------------
-export interface AIProvider {
-	generateText(history: ChatHistory): Promise<string>;
-	countTokens(history: ChatHistory): Promise<number>;
-	isSafeContent(text: string): Promise<boolean>;
-}
+import { AIProvider } from "./aiProvider";
 
 //-------------------------------------------------------
 // AI Provider Factory
 //-------------------------------------------------------
 export let currentAI: AIProvider;
 
-export function initializeAI() {
+export async function initializeAI() {
+	const aiProvider = process.env.AI_PROVIDER || "GEMINI"; // Default to GEMINI
+
 	if (aiProvider === "GEMINI") {
-		currentAI = new GeminiAI(geminiApiKey!, geminiModel);
+		currentAI = new GeminiAI();
 		logger.info("Using Gemini AI provider.");
 	} else if (aiProvider === "OLLAMA") {
-		currentAI = new OllamaAI(ollamaBaseUrl!, ollamaModel);
-		logger.info(`Using Ollama AI provider with model: ${ollamaModel} at ${ollamaBaseUrl}.`);
+		currentAI = new OllamaAI();
+		logger.info(`Using Ollama AI provider.`);
 	} else {
 		throw new Error(`Unsupported AI_PROVIDER: ${aiProvider}`);
 	}
+
+	await currentAI.init();
 }
 
 //-------------------------------------------------------
