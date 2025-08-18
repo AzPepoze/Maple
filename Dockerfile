@@ -26,6 +26,12 @@ RUN pnpm prune --prod
 
 FROM node:24-alpine
 WORKDIR /app
+RUN apk add --no-cache python3
+RUN apk add --no-cache uv
+RUN apk add --no-cache tzdata
+ENV TZ=UTC
+
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime
 
 # Copy built artifacts and production node_modules
 COPY --from=build /app/dist ./dist
