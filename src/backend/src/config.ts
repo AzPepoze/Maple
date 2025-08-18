@@ -9,5 +9,5 @@ export const SUMMARIZE_PROMPT_PATH = path.join(DATA_PATH, "summarize.md");
 
 export const MAX_HISTORY_TOKENS = parseInt(process.env.MAX_HISTORY_TOKENS || "20000", 10);
 
-export const MCP_PATH = path.join(REPO_PATH, "mcp.json");
+export const MCP_PATH = path.join(DATA_PATH, "mcp.json");
 export const MCP_CONFIG = require(MCP_PATH).mcpServers;
