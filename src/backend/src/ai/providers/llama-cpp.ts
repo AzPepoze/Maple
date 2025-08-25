@@ -16,6 +16,7 @@ export class LlamaCPP extends AIProvider {
 	}
 
 	async generateText(history: ChatHistory): Promise<string> {
+		JSON.stringify(this._mapChatHistoryToContents(history), null, 2);
 		const response = await fetch(`${this.llamaCPPURL}/v1/chat/completions`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
