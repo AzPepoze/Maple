@@ -35,25 +35,15 @@ export class LlamaCPP extends AIProvider {
 				const { done, value } = await reader.read();
 				if (done) break;
 
-				const chunk: {
-					data: {
-						index: number;
-						content: string;
-						tokens: number[];
-						stop: boolean;
-						id_slot: number;
-						tokens_predicted: number;
-						tokens_evaluated: number;
-					};
-				} = decoder.decode(value, { stream: true }) as any;
+				const chunk = decoder.decode(value, { stream: true });
 
 				logger.info(JSON.stringify(chunk));
 
 				try {
-					const content = chunk.data.content;
+					const content = JSON.parse(chunk).content;
 					fullResponse += content;
 				} catch (error) {
-					logger.error("Can't get content from response.");
+					logger.error("Can't get content from response.", error);
 				}
 			}
 
