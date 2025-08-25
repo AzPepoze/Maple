@@ -1,6 +1,6 @@
 import { logger } from "../../utils/logger";
 import { AIProvider } from "../aiProvider";
-import { ChatHistory } from "../memory";
+import { ChatContent, ChatHistory, ChatPart } from "../memory";
 
 export class LlamaCPP extends AIProvider {
 	private llamaCPPURL: string;
@@ -15,8 +15,26 @@ export class LlamaCPP extends AIProvider {
 		}
 	}
 
+	public _mapChatHistoryToContents(history: ChatHistory): {
+		role: string;
+		contents: string;
+	}[] {
+		return history.map((chatContent: ChatContent) => ({
+			role: chatContent.role,
+			contents: chatContent.parts
+				.map((part: ChatPart) => {
+					if (part.text) {
+						return part.text;
+					}
+					return "";
+				})
+				.join(" "),
+		}));
+	}
+
 	async generateText(history: ChatHistory): Promise<string> {
-		JSON.stringify(this._mapChatHistoryToContents(history), null, 2);
+		logger.info(JSON.stringify(this._mapChatHistoryToContents(history), null, 2));
+
 		const response = await fetch(`${this.llamaCPPURL}/v1/chat/completions`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },

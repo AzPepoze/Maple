@@ -1,5 +1,5 @@
 import { GenerateContentParameters, GoogleGenAI, mcpToTool } from "@google/genai";
-import { ChatHistory } from "../memory";
+import { ChatContent, ChatHistory, ChatPart } from "../memory";
 import { AIProvider } from "../aiProvider";
 
 export class GeminiAI extends AIProvider {
@@ -25,6 +25,22 @@ export class GeminiAI extends AIProvider {
 		this.currentModelIndex = 0;
 		this.modelFailureCounts = new Map<string, number>();
 		this.ignoredModels = new Map<string, number>();
+	}
+
+	public _mapChatHistoryToContents(history: ChatHistory) {
+		return history.map((chatContent: ChatContent) => ({
+			role: chatContent.role,
+			parts: chatContent.parts.map((part: ChatPart) => {
+				if (part.text) {
+					return { text: part.text };
+				} else if (part.inlineData) {
+					return { inlineData: part.inlineData };
+				} else if (part.functionResponse) {
+					return { functionResponse: part.functionResponse };
+				}
+				return {};
+			}),
+		}));
 	}
 
 	private async _generateContentStream(model: string, history: ChatHistory): Promise<any> {
