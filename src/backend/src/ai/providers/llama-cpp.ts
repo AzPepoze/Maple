@@ -33,13 +33,20 @@ export class LlamaCPP extends AIProvider {
 	}
 
 	async generateText(history: ChatHistory): Promise<string> {
-		logger.info(JSON.stringify(this._mapChatHistoryToContents(history), null, 2));
+		const messages = [
+			{
+				role: "system",
+				content: this.persona,
+			},
+			...this._mapChatHistoryToContents(history),
+		];
+		logger.info(JSON.stringify(messages, null, 2));
 
 		const response = await fetch(`${this.llamaCPPURL}/v1/chat/completions`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify({
-				messages: this._mapChatHistoryToContents(history),
+				messages,
 				stream: true,
 			}),
 		});
@@ -47,22 +54,36 @@ export class LlamaCPP extends AIProvider {
 		if (response.ok && response.body) {
 			const reader = response.body.getReader();
 			const decoder = new TextDecoder();
-
 			let fullResponse = "";
+			let buffer = "";
 
 			while (true) {
 				const { done, value } = await reader.read();
 				if (done) break;
+				buffer += decoder.decode(value, { stream: true });
 
-				const chunk = decoder.decode(value, { stream: true });
+				const lines = buffer.split("\n");
+				buffer = lines.pop() || "";
 
-				logger.info(chunk.slice(6));
+				for (const line of lines) {
+					const trimmedLine = line.trim();
+					if (trimmedLine.startsWith("data: ")) {
+						const dataContent = trimmedLine.substring(6);
 
-				try {
-					const content = JSON.parse(chunk.slice(6)).content;
-					fullResponse += content;
-				} catch (error) {
-					logger.error("Can't get content from response.", error);
+						if (dataContent === "[DONE]") {
+							break;
+						}
+
+						try {
+							const json = JSON.parse(dataContent);
+							const content = json.choices[0]?.delta?.content;
+							if (content) {
+								fullResponse += content;
+							}
+						} catch (error) {
+							logger.error("Failed to parse JSON from stream line:", dataContent, error);
+						}
+					}
 				}
 			}
 
