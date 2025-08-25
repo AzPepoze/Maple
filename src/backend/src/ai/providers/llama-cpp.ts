@@ -20,7 +20,7 @@ export class LlamaCPP extends AIProvider {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify({
-				prompt: "Tell me a story about a dragon.",
+				messages: this._mapChatHistoryToContents(history),
 				stream: true,
 			}),
 		});
@@ -48,7 +48,7 @@ export class LlamaCPP extends AIProvider {
 			}
 
 			logger.info(fullResponse);
-			return "";
+			return fullResponse;
 		} else {
 			logger.debug("LlamaCPP response not ok:", response.statusText);
 			throw new Error(`Request failed with status ${response.status}`);
