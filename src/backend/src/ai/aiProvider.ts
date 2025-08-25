@@ -1,4 +1,4 @@
-import { ChatHistory } from "./memory";
+import { ChatContent, ChatHistory, ChatPart } from "./memory";
 import { Client as MCPClient } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { loadPersona } from "./utils";
@@ -28,5 +28,21 @@ export abstract class AIProvider {
 				console.error(`Error connecting to ${name}: ${error}`);
 			}
 		}
+	}
+
+	public _mapChatHistoryToContents(history: ChatHistory) {
+		return history.map((chatContent: ChatContent) => ({
+			role: chatContent.role,
+			parts: chatContent.parts.map((part: ChatPart) => {
+				if (part.text) {
+					return { text: part.text };
+				} else if (part.inlineData) {
+					return { inlineData: part.inlineData };
+				} else if (part.functionResponse) {
+					return { functionResponse: part.functionResponse };
+				}
+				return {};
+			}),
+		}));
 	}
 }
