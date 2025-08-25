@@ -17,11 +17,11 @@ export class LlamaCPP extends AIProvider {
 
 	public _mapChatHistoryToContents(history: ChatHistory): {
 		role: string;
-		contents: string;
+		content: string;
 	}[] {
 		return history.map((chatContent: ChatContent) => ({
 			role: chatContent.role,
-			contents: chatContent.parts
+			content: chatContent.parts
 				.map((part: ChatPart) => {
 					if (part.text) {
 						return part.text;
