@@ -120,9 +120,7 @@ export class GeminiAI extends AIProvider {
 			}
 		}
 
-		const availableModels = this.primaryModels.filter(
-			(model) => !this.ignoredModels.has(model)
-		);
+		const availableModels = this.primaryModels.filter((model) => !this.ignoredModels.has(model));
 
 		if (availableModels.length === 0) {
 			throw new Error("No models available to generate text (all are ignored).");
@@ -147,15 +145,24 @@ export class GeminiAI extends AIProvider {
 					const reEnableTime = now + this.IGNORE_DURATION_MS;
 					this.ignoredModels.set(modelToUse, reEnableTime);
 					console.error(
-						`Model ${modelToUse} exceeded quota and will be ignored until ${new Date(reEnableTime).toLocaleTimeString()}.`
+						`Model ${modelToUse} exceeded quota and will be ignored until ${new Date(
+							reEnableTime
+						).toLocaleTimeString()}.`
 					);
 					continue; // Skip to the next model immediately
 				}
 
 				// Check for 500-level errors and retry the same model
-				if (error.status && error.status >= 500 && error.status < 600 && current500Retries < MAX_500_RETRIES) {
+				if (
+					error.status &&
+					error.status >= 500 &&
+					error.status < 600 &&
+					current500Retries < MAX_500_RETRIES
+				) {
 					current500Retries++;
-					console.warn(`Retrying model ${modelToUse} due to 500-level error. Retry attempt: ${current500Retries}`);
+					console.warn(
+						`Retrying model ${modelToUse} due to 500-level error. Retry attempt: ${current500Retries}`
+					);
 					i--; // Decrement i to retry the same model
 					continue;
 				}
@@ -171,7 +178,11 @@ export class GeminiAI extends AIProvider {
 					const reEnableTime = now + this.IGNORE_DURATION_MS;
 					this.ignoredModels.set(modelToUse, reEnableTime);
 					console.error(
-						`Model ${modelToUse} failed ${this.MAX_FAILURES} times consecutively and will be ignored until ${new Date(reEnableTime).toLocaleTimeString()}.`
+						`Model ${modelToUse} failed ${
+							this.MAX_FAILURES
+						} times consecutively and will be ignored until ${new Date(
+							reEnableTime
+						).toLocaleTimeString()}.`
 					);
 				}
 
@@ -190,15 +201,5 @@ export class GeminiAI extends AIProvider {
 			contents: contents,
 		});
 		return result.totalTokens ?? 0;
-	}
-
-	async isSafeContent(text: string): Promise<boolean> {
-		const result = await this.genAI.models.generateContent({
-			model: this.primaryModels[this.currentModelIndex],
-			contents: [{ role: "user", parts: [{ text: text }] }],
-		});
-		const safetyRatings = result.promptFeedback?.safetyRatings;
-
-		return !safetyRatings?.some((rating) => rating.probability === "HIGH" || rating.probability === "MEDIUM");
 	}
 }

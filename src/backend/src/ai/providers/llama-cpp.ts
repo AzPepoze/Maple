@@ -1,0 +1,56 @@
+import { logger } from "../../utils/logger";
+import { AIProvider } from "../aiProvider";
+import { ChatHistory } from "../memory";
+
+export class LlamaCPP extends AIProvider {
+	private llamaCPPURL: string;
+
+	constructor() {
+		super();
+		if (process.env.LLAMA_CPP_URL) {
+			this.llamaCPPURL = process.env.LLAMA_CPP_URL;
+		} else {
+			logger.info("LLAMA_CPP_URL environment variable is not set. Using default. (http://localhost:8000)");
+			this.llamaCPPURL = "http://localhost:8000";
+		}
+	}
+
+	async generateText(history: ChatHistory): Promise<string> {
+		const response = await fetch(`${this.llamaCPPURL}/completion`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({
+				prompt: "Tell me a story about a dragon.",
+				stream: true,
+			}),
+		});
+
+		if (response.ok && response.body) {
+			const reader = response.body.getReader();
+			const decoder = new TextDecoder();
+
+			let fullResponse = "";
+
+			while (true) {
+				const { done, value } = await reader.read();
+				if (done) break;
+				const chunk = decoder.decode(value, { stream: true });
+				logger.info(chunk);
+				fullResponse += chunk;
+			}
+
+			logger.info(fullResponse);
+			return fullResponse;
+		} else {
+			logger.debug("LlamaCPP response not ok:", response.statusText);
+			throw new Error(`Request failed with status ${response.status}`);
+		}
+	}
+
+	async countTokens(history: ChatHistory): Promise<number> {
+		// const context = history.getContext();
+		// // Call to LlamaCPP's token counting API
+		// return llamaCPPAPI.countTokens(context);
+		return 0;
+	}
+}

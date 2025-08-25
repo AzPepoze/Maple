@@ -60,9 +60,4 @@ export class OllamaAI extends AIProvider {
         const fullText = history.map(item => item.parts.map(part => part.text).join(" ")).join(" ");
         return Math.ceil(fullText.length / 4);
     }
-
-    async isSafeContent(text: string): Promise<boolean> {
-        logger.warn("Ollama does not provide built-in safety filtering. Assuming content is safe.");
-        return true;
-    }
 }

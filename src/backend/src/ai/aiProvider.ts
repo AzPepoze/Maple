@@ -7,7 +7,6 @@ import { MCP_CONFIG } from "../config";
 export abstract class AIProvider {
 	public abstract generateText(history: ChatHistory): Promise<string>;
 	public abstract countTokens(history: ChatHistory): Promise<number>;
-	public abstract isSafeContent(text: string): Promise<boolean>;
 
 	public mcp: MCPClient;
 	public transport: StdioClientTransport | null = null;
