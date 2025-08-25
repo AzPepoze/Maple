@@ -37,10 +37,10 @@ export class LlamaCPP extends AIProvider {
 
 				const chunk = decoder.decode(value, { stream: true });
 
-				logger.info(JSON.stringify(chunk));
+				logger.info(JSON.parse(chunk));
 
 				try {
-					const content = JSON.parse(chunk).content;
+					const content = JSON.parse(chunk.slice(6)).content;
 					fullResponse += content;
 				} catch (error) {
 					logger.error("Can't get content from response.", error);
