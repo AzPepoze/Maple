@@ -2,11 +2,9 @@ import { ChatHistory } from "./memory";
 import { logger } from "../utils/logger";
 
 // This file handles AI-related functionalities.
-
 import { GeminiAI } from "./providers/gemini";
-import { OllamaAI } from "./providers/ollama";
-import { AIProvider } from "./aiProvider";
 import { LlamaCPP } from "./providers/llama-cpp";
+import { AIProvider } from "./aiProvider";
 
 //-------------------------------------------------------
 // AI Provider Factory
@@ -14,16 +12,12 @@ import { LlamaCPP } from "./providers/llama-cpp";
 export let currentAI: AIProvider;
 
 export async function initializeAI() {
-	const aiProvider = process.env.AI_PROVIDER || "GEMINI"; // Default to GEMINI
+	const aiProvider = process.env.AI_PROVIDER || "GEMINI";
 
 	switch (aiProvider) {
 		case "GEMINI":
 			currentAI = new GeminiAI();
 			logger.info("Using Gemini AI provider.");
-			break;
-		case "OLLAMA":
-			currentAI = new OllamaAI();
-			logger.info(`Using Ollama AI provider.`);
 			break;
 		case "LLAMA_CPP":
 			currentAI = new LlamaCPP();

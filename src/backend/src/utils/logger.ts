@@ -1,14 +1,12 @@
+import * as fs from "fs";
 
-
-import * as fs from 'fs';
-
-const LOG_FILE = 'log.log';
+const LOG_FILE = "log.log";
 
 function emitLog(level: string, message: string, ...args: any[]) {
 	const timestamp = new Date().toISOString();
 	const logMessage = `[${timestamp}] [${level.toUpperCase()}] ${message}`;
 
-	fs.appendFileSync(LOG_FILE, logMessage + '\n');
+	fs.appendFileSync(LOG_FILE, logMessage + "\n");
 
 	if (level === "log") {
 		console.log(logMessage, ...args);

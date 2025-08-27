@@ -1,5 +1,12 @@
 import { Message, ChannelType } from "discord.js";
-import { getUserHistory, appendToHistory, saveUserHistory, forceSummarizeUserHistory, clearUserHistory, ChatContent, ChatPart } from "../ai/memory";
+import {
+	getUserHistory,
+	saveUserHistory,
+	forceSummarizeUserHistory,
+	clearUserHistory,
+	ChatContent,
+	ChatPart,
+} from "../ai/memory";
 import { generateText } from "../ai";
 import { logger } from "../utils/logger";
 import axios from "axios";
@@ -19,19 +26,21 @@ export async function handleDirectMessage(message: Message): Promise<void> {
 		if (userMessageLower === "/sum") {
 			const summarizedHistory = await forceSummarizeUserHistory(userId);
 			if (summarizedHistory.length > 0) {
-				const summaryText = summarizedHistory.map((item: ChatContent) => item.parts.map((part: ChatPart) => part.text).join(' ')).join('\n');
+				const summaryText = summarizedHistory
+					.map((item: ChatContent) => item.parts.map((part: ChatPart) => part.text).join(" "))
+					.join("\n");
 				await message.channel.send(`Your chat history has been summarized:\n\
 \
 ${summaryText}\
 \
 			`);
 			} else {
-				await message.channel.send('Your chat history is empty or could not be summarized.');
+				await message.channel.send("Your chat history is empty or could not be summarized.");
 			}
 			return;
 		} else if (userMessageLower === "/clear") {
 			await clearUserHistory(userId);
-			await message.channel.send('Your chat history has been cleared.');
+			await message.channel.send("Your chat history has been cleared.");
 			return;
 		}
 
@@ -45,7 +54,7 @@ ${summaryText}\
 		for (const attachment of message.attachments.values()) {
 			if (attachment.contentType && attachment.contentType.startsWith("image/")) {
 				try {
-					const response = await axios.get(attachment.url, { responseType: 'arraybuffer' });
+					const response = await axios.get(attachment.url, { responseType: "arraybuffer" });
 					if (response.status !== 200) {
 						throw new Error(`Failed to fetch image: ${response.statusText}`);
 					}

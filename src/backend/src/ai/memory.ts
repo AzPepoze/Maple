@@ -2,7 +2,7 @@ import * as fs from "fs/promises";
 import * as path from "path";
 import { logger } from "../utils/logger";
 import { MEMORY_PATH, MAX_HISTORY_TOKENS } from "../config";
-import { currentAI } from "./index";
+import { currentAI } from ".";
 import { loadSummarizePrompt } from "./utils";
 
 //-------------------------------------------------------

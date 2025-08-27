@@ -2,16 +2,16 @@ import "dotenv/config";
 import { startDiscordBot, client } from "./discord";
 import { logger } from "./utils/logger";
 import { startWebServer } from "./server";
-import * as fs from 'fs';
+import * as fs from "fs";
 import { initializeAI } from "./ai";
 
 //-------------------------------------------------------
 // Main Execution
 //-------------------------------------------------------
 async function main() {
-	const logFilePath = 'log.log';
+	const logFilePath = "log.log";
 	if (fs.existsSync(logFilePath)) {
-		fs.writeFileSync(logFilePath, '');
+		fs.writeFileSync(logFilePath, "");
 	}
 	logger.log("Starting bot...");
 	initializeAI();
